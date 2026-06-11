@@ -1,0 +1,850 @@
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>건설안전관리자 스마트 포털</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 안전관리자 컨셉의 커스텀 테마 색상 설정 */
+        :root {
+            --safety-blue: #1e3a8a;
+            --safety-yellow: #f59e0b;
+        }
+        /* 스무스 스크롤 및 기본 폰트 설정 */
+        html {
+            scroll-behavior: smooth;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- 상단 내비게이션 바 -->
+    <header class="bg-blue-900 text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- 로고 영역 -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('profile')">
+                    <div class="bg-yellow-500 text-blue-900 p-2 rounded-lg font-black flex items-center justify-center">
+                        <i class="fa-solid fa-helmet-safety text-xl animate-bounce"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg block tracking-wider leading-none">안전제일</span>
+                        <span class="text-xs text-yellow-400 font-semibold">건설안전관리자 Portal</span>
+                    </div>
+                </div>
+
+                <!-- 데스크톱 메뉴 -->
+                <nav class="hidden md:flex space-x-1">
+                    <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-800 text-white">
+                        <i class="fa-solid fa-user-tie mr-1.5"></i>프로필
+                    </button>
+                    <button onclick="switchTab('laws')" id="nav-laws" class="nav-btn px-4 py-2 rounded-md text-sm font-medium transition-colors text-slate-300 hover:bg-blue-800 hover:text-white">
+                        <i class="fa-solid fa-gavel mr-1.5"></i>안전 법령
+                    </button>
+                    <button onclick="switchTab('share')" id="nav-share" class="nav-btn px-4 py-2 rounded-md text-sm font-medium transition-colors text-slate-300 hover:bg-blue-800 hover:text-white">
+                        <i class="fa-solid fa-file-shield mr-1.5"></i>공유게시판
+                    </button>
+                    <button onclick="switchTab('community')" id="nav-community" class="nav-btn px-4 py-2 rounded-md text-sm font-medium transition-colors text-slate-300 hover:bg-blue-800 hover:text-white">
+                        <i class="fa-solid fa-comments mr-1.5"></i>자유게시판
+                    </button>
+                </nav>
+
+                <!-- 모바일 메뉴 버튼 -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white p-2 rounded-md focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 모바일 드롭다운 메뉴 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-blue-950 border-t border-blue-800 px-2 pt-2 pb-4 space-y-1">
+            <button onclick="switchTab('profile')" class="mobile-nav-btn w-full text-left block px-3 py-2.5 rounded-md text-base font-medium text-white bg-blue-800">
+                <i class="fa-solid fa-user-tie mr-2 w-5 text-center"></i>프로필
+            </button>
+            <button onclick="switchTab('laws')" class="mobile-nav-btn w-full text-left block px-3 py-2.5 rounded-md text-base font-medium text-slate-300 hover:bg-blue-800 hover:text-white">
+                <i class="fa-solid fa-gavel mr-2 w-5 text-center"></i>안전 법령
+            </button>
+            <button onclick="switchTab('share')" class="mobile-nav-btn w-full text-left block px-3 py-2.5 rounded-md text-base font-medium text-slate-300 hover:bg-blue-800 hover:text-white">
+                <i class="fa-solid fa-file-shield mr-2 w-5 text-center"></i>공유게시판
+            </button>
+            <button onclick="switchTab('community')" class="mobile-nav-btn w-full text-left block px-3 py-2.5 rounded-md text-base font-medium text-slate-300 hover:bg-blue-800 hover:text-white">
+                <i class="fa-solid fa-comments mr-2 w-5 text-center"></i>자유게시판
+            </button>
+        </div>
+    </header>
+
+    <!-- 실시간 안전 알림 배너 -->
+    <div class="bg-amber-500 text-slate-900 py-2 px-4 shadow-sm text-center font-bold text-sm flex items-center justify-center space-x-2">
+        <span class="animate-pulse bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">NOTICE</span>
+        <span class="truncate">오늘의 안전 슬로건: "설마하는 방심속에 도사린 재해현장, 확인하는 예방속에 안전한 우리일터"</span>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- 1. 프로필 탭 (Profile Tab) -->
+        <section id="tab-profile" class="tab-content block">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 프로필 카드 (좌측) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-1">
+                    <div class="h-32 bg-gradient-to-r from-blue-950 to-blue-800 relative">
+                        <div class="absolute -bottom-12 left-1/2 -translate-x-1/2">
+                            <div class="w-24 h-24 rounded-full border-4 border-white bg-yellow-400 flex items-center justify-center text-blue-900 shadow-md">
+                                <i class="fa-solid fa-user-shield text-4xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-16 pb-6 px-6 text-center">
+                        <h2 class="text-xl font-bold text-slate-900">장 성 은</h2>
+                        <p class="text-sm text-blue-600 font-semibold mt-1">건설안전기사 / 안전보건관리책임자</p>
+                        <div class="flex items-center justify-center space-x-2 mt-3">
+                            <span class="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-medium border border-emerald-200">
+                                <span class="w-1.5 h-1.5 bg-emerald-500 inline-block rounded-full mr-1"></span>현장 상주 중
+                            </span>
+                        </div>
+                        <p class="text-slate-600 text-sm mt-4 leading-relaxed">
+                            "타협 없는 안전이 최고의 시공 경쟁력입니다."<br>
+                            15년 경력의 베테랑 건설안전 전문가로서 무재해 준공을 목표로 합니다.
+                        </p>
+                        
+                        <div class="border-t border-slate-100 my-5"></div>
+                        
+                        <div class="text-left space-y-3 text-sm text-slate-600">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-envelope w-6 text-blue-600"></i>
+                                <a href="mailto:jang5251@naver.com" class="hover:text-blue-600 transition-colors">jang5251@naver.com</a>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-phone w-6 text-blue-600"></i>
+                                <a href="tel:010-4295-6313" class="hover:text-blue-600 transition-colors">010-4295-6313</a>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-location-dot w-6 text-blue-600"></i>
+                                <span>경남 창원시 마산회원구 3•15대로 대아빌딩 3층 (본사)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 상세 경력 및 역량 (우측) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- 보유 자격증 -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                            <i class="fa-solid fa-id-card text-yellow-500 mr-2"></i>보유 자격 및 전문 면허
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="flex items-center p-3 bg-slate-50 rounded-xl border border-slate-150">
+                                <div class="p-2 bg-blue-50 text-blue-600 rounded-lg mr-3"><i class="fa-solid fa-graduation-cap"></i></div>
+                                <div>
+                                    <div class="font-semibold text-slate-800 text-sm">건설안전기사</div>
+                                    <div class="text-xs text-slate-500">한국산업인력공단 (2014)</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-slate-50 rounded-xl border border-slate-150">
+                                <div class="p-2 bg-blue-50 text-blue-600 rounded-lg mr-3"><i class="fa-solid fa-shield-halved"></i></div>
+                                <div>
+                                    <div class="font-semibold text-slate-800 text-sm">산업안전기사</div>
+                                    <div class="text-xs text-slate-500">한국산업인력공단 (2012)</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-slate-50 rounded-xl border border-slate-150">
+                                <div class="p-2 bg-blue-50 text-blue-600 rounded-lg mr-3"><i class="fa-solid fa-hard-drive"></i></div>
+                                <div>
+                                    <div class="font-semibold text-slate-800 text-sm">건설재해예방지도사</div>
+                                    <div class="text-xs text-slate-500">고용노동부 (2018)</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-slate-50 rounded-xl border border-slate-150">
+                                <div class="p-2 bg-blue-50 text-blue-600 rounded-lg mr-3"><i class="fa-solid fa-user-doctor"></i></div>
+                                <div>
+                                    <div class="font-semibold text-slate-800 text-sm">보건관리자(응급구조사 1급)</div>
+                                    <div class="text-xs text-slate-500">보건복지부 (2014)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 현장 관리 이력 -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                            <i class="fa-solid fa-building-shield text-yellow-500 mr-2"></i>주요 건설현장 안전관리 경력
+                        </h3>
+                        <div class="space-y-4 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-slate-200">
+                            <!-- 경력 1 -->
+                            <div class="relative pl-8 pb-1">
+                                <div class="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-blue-600 bg-white"></div>
+                                <span class="text-xs text-slate-400 font-semibold block">2024. 03 ~ 현재</span>
+                                <span class="font-bold text-slate-800 block text-base">서울 가산 아파트 신축공사 (H건설)</span>
+                                <span class="text-sm text-slate-600">총괄안전보건관리자 / 지하 4층 ~ 지상 35층, 무재해 400만 시간 달성 중</span>
+                            </div>
+                            <!-- 경력 2 -->
+                            <div class="relative pl-8 pb-1">
+                                <div class="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-slate-400 bg-white"></div>
+                                <span class="text-xs text-slate-400 font-semibold block">2021. 01 ~ 2024. 02</span>
+                                <span class="font-bold text-slate-800 block text-base">인천 신항 배후단지 물류창고 신축공사 (S건설)</span>
+                                <span class="text-sm text-slate-600">안전팀장 / 철골구조물 고소작업 집중 위험성평가 도입, 무재해 준공 달성</span>
+                            </div>
+                            <!-- 경력 3 -->
+                            <div class="relative pl-8">
+                                <div class="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-slate-400 bg-white"></div>
+                                <span class="text-xs text-slate-400 font-semibold block">2016. 05 ~ 2020. 12</span>
+                                <span class="font-bold text-slate-800 block text-base">부산 지하철 2호선 복선전철 공사 (D건설)</span>
+                                <span class="text-sm text-slate-600">터널 및 굴착 공정 전담 안전관리자 / 위험 유해요소 집중 사전 차단 시스템 운영</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 법령 탭 (Laws Tab) -->
+        <section id="tab-laws" class="tab-content hidden">
+            <!-- 법령 검색 및 필터 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+                <h2 class="text-xl font-bold text-slate-900 mb-2 flex items-center">
+                    <i class="fa-solid fa-magnifying-glass text-yellow-500 mr-2"></i>안전 법령 초고속 검색 서비스
+                </h2>
+                <p class="text-slate-500 text-sm mb-4">현장에서 가장 빈번하게 조회되는 산업안전보건법 및 건설기술 진흥법을 쉽게 검색하세요.</p>
+                
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input id="law-search-input" onkeyup="filterLaws()" type="text" placeholder="법령 키워드 또는 법조항 번호 입력 (예: 안전보건관리책임자, 제38조...)" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white text-sm transition-all">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="filterLawCategory('all')" id="btn-cat-all" class="law-cat-btn bg-blue-900 text-white px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap shadow-sm">전체</button>
+                        <button onclick="filterLawCategory('산안법')" id="btn-cat-san" class="law-cat-btn bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap">산업안전보건법</button>
+                        <button onclick="filterLawCategory('중처법')" id="btn-cat-jung" class="law-cat-btn bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap">중대재해처벌법</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 법령 카드 리스트 -->
+            <div id="law-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 법령 아이템 1 -->
+                <div class="law-item bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow" data-category="산안법" data-keyword="안전보건관리책임자 지정 제15조">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded-full font-bold">산업안전보건법 제15조</span>
+                        <span class="text-slate-400 text-xs"><i class="fa-solid fa-calendar mr-1"></i>최신개정 반영</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 mb-2">안전보건관리책임자의 지정 및 임무</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 hover:line-clamp-none transition-all duration-300">
+                        사업주는 사업장에 안전보건관리책임자를 두어 사업장의 안전 및 보건에 관한 업무를 총괄 관리하도록 하여야 한다. 대상 사업은 상시 근로자 50인 이상 또는 공사금액 50억원 이상(관계법령 시행령 별표3 참고) 건설업을 포함한다.
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-amber-600 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>위반 시 과태료 최대 500만원</span>
+                        <a href="https://www.law.go.kr" target="_blank" class="text-blue-600 hover:underline">국가법령정보센터 <i class="fa-solid fa-up-right-from-square ml-0.5"></i></a>
+                    </div>
+                </div>
+
+                <!-- 법령 아이템 2 -->
+                <div class="law-item bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow" data-category="산안법" data-keyword="안전조치 의무 위험 예방 제38조">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded-full font-bold">산업안전보건법 제38조</span>
+                        <span class="text-slate-400 text-xs"><i class="fa-solid fa-calendar mr-1"></i>최신개정 반영</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 mb-2">사업주의 안전조치 의무</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 hover:line-clamp-none transition-all duration-300">
+                        사업주는 기계ㆍ기구, 그 밖의 설비에 의한 위험, 폭발성ㆍ발화성 및 인화성 물질 등에 의한 위험, 추락ㆍ붕괴ㆍ토사 낙하 등에 의한 위험을 예방하기 위하여 필요한 조치를 하여야 한다. 특히 고소작업 시 안전난간 및 추락방호망 설치는 필수 의무 사항이다.
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-red-600 font-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i>사망 사고 발생 시 형사처벌 대상</span>
+                        <a href="https://www.law.go.kr" target="_blank" class="text-blue-600 hover:underline">국가법령정보센터 <i class="fa-solid fa-up-right-from-square ml-0.5"></i></a>
+                    </div>
+                </div>
+
+                <!-- 법령 아이템 3 -->
+                <div class="law-item bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow" data-category="중처법" data-keyword="중대산업재해 정의 사망 부상 징역 벌금 제4조">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">중대재해처벌법 제4조</span>
+                        <span class="text-slate-400 text-xs"><i class="fa-solid fa-calendar mr-1"></i>경영책임자 의무</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 mb-2">사업주와 경영책임자등의 안전 및 보건 확보의무</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 hover:line-clamp-none transition-all duration-300">
+                        경영책임자 등은 실질적으로 지배ㆍ운영ㆍ관리하는 사업 또는 사업장에서 종사자의 안전ㆍ보건상 유해 또는 위험을 방지하기 위하여 재해예방에 필요한 인력 및 예산 등 안전보건관리체계의 구축 및 그 이행에 관한 조치를 취해야 한다.
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-red-600 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>사망시 1년 이상 징역 또는 10억 이하 벌금</span>
+                        <a href="https://www.law.go.kr" target="_blank" class="text-blue-600 hover:underline">국가법령정보센터 <i class="fa-solid fa-up-right-from-square ml-0.5"></i></a>
+                    </div>
+                </div>
+
+                <!-- 법령 아이템 4 -->
+                <div class="law-item bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow" data-category="중처법" data-keyword="도급 용역 위탁 안전 보건 확보 제5조">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">중대재해처벌법 제5조</span>
+                        <span class="text-slate-400 text-xs"><i class="fa-solid fa-calendar mr-1"></i>수급인 관계</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 mb-2">도급, 용역, 위탁 관계에서의 안전 및 보건 확보의무</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 hover:line-clamp-none transition-all duration-300">
+                        사업주 또는 경영책임자등은 제3자에게 도급, 용역, 위탁 등을 행한 경우에는 제3자의 종사자에게 중대산업재해가 발생하지 아니하도록 안전 및 보건 확보 의무를 조치하여야 한다. 단, 시설, 장비, 장소 등에 실질적인 지배ㆍ운영ㆍ관리 권한이 있는 경우에 한한다.
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-amber-600 font-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i>원청 책임 범위 대폭 확대</span>
+                        <a href="https://www.law.go.kr" target="_blank" class="text-blue-600 hover:underline">국가법령정보센터 <i class="fa-solid fa-up-right-from-square ml-0.5"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 검색 결과 없음 안내 -->
+            <div id="no-law-results" class="hidden bg-slate-100 text-center py-12 rounded-2xl border-2 border-dashed border-slate-200 text-slate-500">
+                <i class="fa-solid fa-folder-open text-4xl mb-3 block text-slate-300"></i>
+                검색 조건과 일치하는 안전 법령 정보가 없습니다. 다른 검색어를 입력해 주세요.
+            </div>
+        </section>
+
+        <!-- 3. 공유게시판 탭 (Share Tab) -->
+        <section id="tab-share" class="tab-content hidden">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- 파일 업로드 및 양식 추가 폼 (좌측) -->
+                <div class="w-full lg:w-1/3 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-fit sticky top-24">
+                    <h3 class="text-lg font-bold text-slate-900 mb-2 flex items-center">
+                        <i class="fa-solid fa-file-arrow-up text-yellow-500 mr-2"></i>자료 및 안전양식 등록
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">공동 현장에서 사용할 위험성평가표, TBM 일지, 특별교육 교안 등의 유용한 양식을 등록하여 공유해 보세요.</p>
+                    
+                    <form onsubmit="handleShareSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">카테고리</label>
+                            <select id="share-category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white" required>
+                                <option value="위험성평가">⚠️ 위험성평가(RA)</option>
+                                <option value="안전교육">📚 안전보건교육 자료</option>
+                                <option value="점검일지">📋 일일 안전점검표</option>
+                                <option value="가이드라인">💡 고용부 가이드라인</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">자료명</label>
+                            <input id="share-title" type="text" placeholder="예: [안전양식] 2026년도 위험성평가 가이드라인" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">설명 및 코멘트</label>
+                            <textarea id="share-desc" rows="3" placeholder="자료에 대한 간략한 사용법이나 참고 사항을 기재해 주세요..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white" required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">가상 파일 지정</label>
+                            <div class="flex items-center justify-center w-full">
+                                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                                    <div class="flex flex-col items-center justify-center pt-4 pb-4">
+                                        <i class="fa-solid fa-cloud-arrow-up text-xl text-slate-400 mb-1"></i>
+                                        <p class="text-[11px] text-slate-500 font-semibold">클릭하여 PDF/Excel 파일 첨부 (가상)</p>
+                                        <p class="text-[9px] text-slate-400">PDF, XLSX, HWP 최대 50MB</p>
+                                    </div>
+                                    <input type="file" class="hidden" id="share-file" onchange="updateFileNameDisplay(this)">
+                                </label>
+                            </div>
+                            <p id="file-name-display" class="text-xs text-blue-600 mt-1 font-semibold text-center hidden"></p>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-900 text-white font-bold py-3 rounded-xl text-sm shadow-md hover:bg-blue-950 transition-colors">
+                            <i class="fa-solid fa-paper-plane mr-1.5"></i>자료 공유 등록하기
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 파일 공유 리스트 (우측) -->
+                <div class="w-full lg:w-2/3 space-y-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">현장 실무 자료실</h3>
+                            <p class="text-slate-500 text-xs">선배 안전관리자들이 공유하는 엄선된 리얼 현장 파일 목록입니다.</p>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs font-semibold">
+                            <span class="text-slate-500">총 <span id="share-count" class="text-blue-600 font-bold">4</span>건</span>
+                        </div>
+                    </div>
+
+                    <!-- 자료 리스트 컨테이너 -->
+                    <div id="share-list-container" class="space-y-4">
+                        <!-- 기본 아이템 1 -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:border-blue-200 transition-colors flex items-start gap-4">
+                            <div class="bg-amber-100 text-amber-700 p-3 rounded-xl text-xl flex items-center justify-center h-12 w-12 flex-shrink-0">
+                                <i class="fa-solid fa-file-excel"></i>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="bg-amber-50 text-amber-700 text-[10px] px-2 py-0.5 rounded border border-amber-200 font-bold">위험성평가</span>
+                                    <span class="text-xs text-slate-400">작성일: 2026-06-10</span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-base mt-1 truncate">[엑셀 서식] 공정별 상시 위험성평가 종합 템플릿</h4>
+                                <p class="text-slate-600 text-xs mt-1">철골, 거푸집, 굴착 등 공사 특성별 핵심 유해위험요인을 3단계 평가법으로 즉각 계산할 수 있게 수식 적용 완료된 스마트 템플릿입니다.</p>
+                                <div class="mt-3 flex justify-between items-center text-xs">
+                                    <span class="text-slate-400">등록자: 장성은 (기술사)</span>
+                                    <button onclick="simulateDownload('[엑셀 서식] 공정별 상시 위험성평가 종합 템플릿.xlsx')" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors">
+                                        <i class="fa-solid fa-download"></i> 다운로드 (420 KB)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 기본 아이템 2 -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:border-blue-200 transition-colors flex items-start gap-4">
+                            <div class="bg-rose-100 text-rose-700 p-3 rounded-xl text-xl flex items-center justify-center h-12 w-12 flex-shrink-0">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="bg-rose-50 text-rose-700 text-[10px] px-2 py-0.5 rounded border border-rose-200 font-bold">안전교육</span>
+                                    <span class="text-xs text-slate-400">작성일: 2026-05-28</span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-base mt-1 truncate">[교육안] 신규 채용자 대상 시각적 3개국어 안전교육 PPT</h4>
+                                <p class="text-slate-600 text-xs mt-1">외국인 근로자가 많은 최근 현장 트렌드를 반영해 한국어/영어/베트남어가 동시 수록된 직관적 안전 수칙 시뮬레이션 및 안전모 착용 실태 안내 교육자료입니다.</p>
+                                <div class="mt-3 flex justify-between items-center text-xs">
+                                    <span class="text-slate-400">등록자: 김안전 (건설안전관리자)</span>
+                                    <button onclick="simulateDownload('[교육안] 신규 채용자 안전교육.pdf')" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors">
+                                        <i class="fa-solid fa-download"></i> 다운로드 (5.2 MB)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 기본 아이템 3 -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:border-blue-200 transition-colors flex items-start gap-4">
+                            <div class="bg-emerald-100 text-emerald-700 p-3 rounded-xl text-xl flex items-center justify-center h-12 w-12 flex-shrink-0">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="bg-emerald-50 text-emerald-700 text-[10px] px-2 py-0.5 rounded border border-emerald-200 font-bold">점검일지</span>
+                                    <span class="text-xs text-slate-400">작성일: 2026-05-15</span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-base mt-1 truncate">[체크리스트] 모바일 최적화 일일 안전보건점검 및 개선조치표</h4>
+                                <p class="text-slate-600 text-xs mt-1">지적 사항에 대한 사진 대지와 피드백을 현장에서 즉시 태블릿을 이용해 작성해 모바일 문서화할 수 있도록 연계한 한글/워드 서식입니다.</p>
+                                <div class="mt-3 flex justify-between items-center text-xs">
+                                    <span class="text-slate-400">등록자: 박검사 (보건지도사)</span>
+                                    <button onclick="simulateDownload('[체크리스트] 일일 안전점검표.docx')" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors">
+                                        <i class="fa-solid fa-download"></i> 다운로드 (180 KB)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 자유게시판 탭 (Community Tab) -->
+        <section id="tab-community" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 새 피드 및 게시글 작성 (좌측) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-fit sticky top-24 lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-900 mb-2 flex items-center">
+                        <i class="fa-solid fa-pen-to-square text-yellow-500 mr-2"></i>오늘의 현장 이야기 쓰기
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">전국 안전관리자 동료들과 함께 고민을 나누고, 오늘의 날씨 및 현장 긴급 위험 경보를 함께 의논해 보세요.</p>
+                    
+                    <form onsubmit="handlePostSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">필명 / 닉네임</label>
+                            <input id="post-author" type="text" placeholder="예: 현장보안관, 망치조심" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">제목</label>
+                            <input id="post-title" type="text" placeholder="소통하고 싶은 주제 입력" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">현장 일기 및 고민 본문</label>
+                            <textarea id="post-content" rows="5" placeholder="오늘 겪은 안전 에피소드나 위험 점검 에러사항 등을 자유롭게 기재해 주세요..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white" required></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-900 text-white font-bold py-3 rounded-xl text-sm shadow-md hover:bg-blue-950 transition-colors">
+                            <i class="fa-solid fa-pencil mr-1.5"></i>글 등록하기
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 실시간 타임라인 게시글 (우측) -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-1">안전관리자 소통 라운지</h3>
+                        <p class="text-slate-500 text-xs">안전관리자들의 생생한 노하우와 직종 애환, 그리고 훈훈한 일상이 공존하는 열린 마당입니다.</p>
+                    </div>
+
+                    <!-- 게시글 타임라인 컨테이너 -->
+                    <div id="post-list-container" class="space-y-4">
+                        <!-- 고정 및 추천 스레드 -->
+                        <div class="bg-yellow-50 border-l-4 border-yellow-500 rounded-r-2xl shadow-sm p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-0.5 rounded font-black"><i class="fa-solid fa-thumbtack mr-0.5"></i>필독공지</span>
+                                    <span class="text-xs text-slate-500 font-medium">관리자 (장성은)</span>
+                                </div>
+                                <span class="text-xs text-slate-400">2026-06-11</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base">중대재해처벌법 및 50억 미만 소규모 건설현장 안전체계 가이드 공유</h4>
+                            <p class="text-slate-700 text-sm mt-1 leading-relaxed">
+                                최근 영세 소규모 건설현장 중심의 감독 지적이 대폭 강화되었습니다. 좌측의 '공유게시판' 탭에 실효성 있는 약식 평가 양식을 업로드 해 두었으니, 전국 현장의 소장님 및 대리인분들께서는 적극 참조하여 사전 대처하시기 바랍니다.
+                            </p>
+                            <div class="mt-3 pt-3 border-t border-yellow-200/50 flex justify-between items-center text-xs">
+                                <span class="text-yellow-800 font-semibold"><i class="fa-solid fa-eye mr-1"></i>조회수 1,289회</span>
+                                <span class="text-slate-500"><i class="fa-solid fa-heart text-red-500 mr-1"></i>공감 115</span>
+                            </div>
+                        </div>
+
+                        <!-- 일반 게시글 1 -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:border-slate-300 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs">무</div>
+                                    <div>
+                                        <span class="text-sm font-bold text-slate-800 block">무재해고고싱</span>
+                                        <span class="text-[10px] text-slate-400">방금 전 | 인천 오피스텔 현장</span>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-slate-400">IP: 211.23.*.*</span>
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-base mt-1">오늘 혹서기 폭염 경보 발령 대비 안전 조치 공유합니다.</h4>
+                            <p class="text-slate-600 text-sm mt-1.5 leading-relaxed">
+                                아침 조례 때부터 습도랑 온도 체크했는데 기온이 급상승하네요. 공정 강제 조율해서 야외 고소 부위 용접작업 전면 12시~14시 중지하고 근로자 휴게실 얼음물 및 포도당 알약 집중 세팅했습니다. 다들 무리하지 않게 안전 관리하세요!
+                            </p>
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
+                                <button onclick="incrementLike(this)" class="flex items-center gap-1 hover:text-red-500 transition-colors">
+                                    <i class="fa-regular fa-thumbs-up text-sm"></i> 추천 <span class="like-count font-bold">14</span>
+                                </button>
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-comment text-sm"></i> 댓글 4</span>
+                            </div>
+                        </div>
+
+                        <!-- 일반 게시글 2 -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:border-slate-300 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">철</div>
+                                    <div>
+                                        <span class="text-sm font-bold text-slate-800 block">철골매니저</span>
+                                        <span class="text-[10px] text-slate-400">1시간 전 | 부산 아파트 현장</span>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-slate-400">IP: 182.16.*.*</span>
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-base mt-1">고소작업 시 안전고리 미체결 근로자 불응 문제, 어떻게 푸시나요?</h4>
+                            <p class="text-slate-600 text-sm mt-1.5 leading-relaxed">
+                                매번 고리 걸라고 외치는데도 귀찮다고 잠깐 방심하시는 숙련 베테랑분들 교육하기 정말 힘드네요. 삼진아웃제 엄격하게 하니 작업 반장님이 협조 안 한다고 하고... 다들 어떤 식으로 작업자 설득 및 현장 통제 하시는지 꿀팁 부탁드립니다.
+                            </p>
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
+                                <button onclick="incrementLike(this)" class="flex items-center gap-1 hover:text-red-500 transition-colors">
+                                    <i class="fa-regular fa-thumbs-up text-sm"></i> 추천 <span class="like-count font-bold">8</span>
+                                </button>
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-comment text-sm"></i> 댓글 12</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 커스텀 알림/메시지 모달 (alert 우회용) -->
+    <div id="toast-modal" class="fixed inset-0 z-[100] flex items-center justify-center px-4 hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full relative z-10 text-center border border-slate-200">
+            <div id="toast-icon" class="text-4xl text-emerald-500 mb-3"><i class="fa-solid fa-circle-check"></i></div>
+            <h4 id="toast-title" class="text-lg font-bold text-slate-900 mb-2">등록이 완료되었습니다!</h4>
+            <p id="toast-desc" class="text-slate-500 text-sm leading-relaxed mb-5">여기에 디테일한 알림 문구가 노출됩니다.</p>
+            <button onclick="closeToast()" class="w-full bg-blue-900 text-white font-bold py-2.5 rounded-xl text-sm hover:bg-blue-950 transition-colors">확인</button>
+        </div>
+    </div>
+
+    <!-- 푸터 영역 -->
+    <footer class="bg-blue-950 text-slate-400 py-8 border-t border-blue-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <p class="font-bold text-white flex items-center justify-center md:justify-start gap-1">
+                    <i class="fa-solid fa-helmet-safety text-yellow-500"></i> 건설안전관리자 장성은 개인 홈피
+                </p>
+                <p class="text-xs text-slate-500 mt-1">© 2026 Construction Safety Portal. All Rights Reserved. Designed for Safety Engineers.</p>
+            </div>
+            <div class="flex gap-4 text-xs text-slate-400">
+                <a href="#" class="hover:text-white transition-colors">이용약관</a>
+                <span class="text-slate-700">|</span>
+                <a href="#" class="hover:text-white transition-colors">개인정보처리방침</a>
+                <span class="text-slate-700">|</span>
+                <a href="mailto:jang5251@naver.com" class="hover:text-white transition-colors">건의사항</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript 로직 -->
+    <script>
+        // 모바일 내비게이션 드롭다운 토글
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 탭 메뉴 전환 (프로필, 법령, 공유게시판, 자유게시판)
+        function switchTab(tabName) {
+            // 모든 콘텐츠 숨기기
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('block');
+            });
+
+            // 선택한 콘텐츠만 보이기
+            const targetContent = document.getElementById('tab-' + tabName);
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+                targetContent.classList.add('block');
+            }
+
+            // 데스크톱 내비게이션 버튼 스타일 갱신
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.classList.remove('bg-blue-800', 'text-white');
+                btn.classList.add('text-slate-300', 'hover:bg-blue-800', 'hover:text-white');
+            });
+
+            const activeBtn = document.getElementById('nav-' + tabName);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-300', 'hover:bg-blue-800', 'hover:text-white');
+                activeBtn.classList.add('bg-blue-800', 'text-white');
+            }
+
+            // 모바일 내비게이션 버튼 스타일 갱신
+            const mobileButtons = document.querySelectorAll('.mobile-nav-btn');
+            mobileButtons.forEach(btn => {
+                btn.classList.remove('bg-blue-800', 'text-white');
+                btn.classList.add('text-slate-300', 'hover:bg-blue-800', 'hover:text-white');
+            });
+
+            // 모바일 메뉴 자체를 닫기
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        // 모달 팝업 유틸리티 함수 (alert 대체)
+        function showToast(title, desc, iconHtml = '<i class="fa-solid fa-circle-check"></i>', isError = false) {
+            const modal = document.getElementById('toast-modal');
+            const titleEl = document.getElementById('toast-title');
+            const descEl = document.getElementById('toast-desc');
+            const iconEl = document.getElementById('toast-icon');
+
+            titleEl.textContent = title;
+            descEl.textContent = desc;
+            iconEl.innerHTML = iconHtml;
+
+            if (isError) {
+                iconEl.className = "text-4xl text-rose-500 mb-3";
+            } else {
+                iconEl.className = "text-4xl text-emerald-500 mb-3";
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        // 모달 닫기
+        function closeToast() {
+            document.getElementById('toast-modal').classList.add('hidden');
+        }
+
+        // 법령 검색 및 카테고리 필터링
+        let currentLawCategory = 'all';
+
+        function filterLawCategory(category) {
+            currentLawCategory = category;
+            
+            // 카테고리 버튼 비주얼 토글
+            const buttons = document.querySelectorAll('.law-cat-btn');
+            buttons.forEach(btn => {
+                btn.className = "law-cat-btn bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap";
+            });
+
+            const targetBtnId = category === 'all' ? 'btn-cat-all' : (category === '산안법' ? 'btn-cat-san' : 'btn-cat-jung');
+            const targetBtn = document.getElementById(targetBtnId);
+            if (targetBtn) {
+                targetBtn.className = "law-cat-btn bg-blue-900 text-white px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap shadow-sm";
+            }
+
+            filterLaws();
+        }
+
+        function filterLaws() {
+            const searchInput = document.getElementById('law-search-input').value.toLowerCase();
+            const items = document.querySelectorAll('.law-item');
+            let matchedCount = 0;
+
+            items.forEach(item => {
+                const category = item.getAttribute('data-category');
+                const keywords = item.getAttribute('data-keyword').toLowerCase();
+                const content = item.textContent.toLowerCase();
+
+                const matchesCategory = (currentLawCategory === 'all' || category === currentLawCategory);
+                const matchesSearch = (keywords.includes(searchInput) || content.includes(searchInput));
+
+                if (matchesCategory && matchesSearch) {
+                    item.classList.remove('hidden');
+                    matchedCount++;
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+
+            const emptyAlert = document.getElementById('no-law-results');
+            if (matchedCount === 0) {
+                emptyAlert.classList.remove('hidden');
+            } else {
+                emptyAlert.classList.add('hidden');
+            }
+        }
+
+        // 공유게시판 첨부 가상파일명 업데이트 디스플레이
+        function updateFileNameDisplay(input) {
+            const display = document.getElementById('file-name-display');
+            if (input.files && input.files[0]) {
+                display.textContent = `📎 선택된 파일: ${input.files[0].name}`;
+                display.classList.remove('hidden');
+            } else {
+                display.classList.add('hidden');
+            }
+        }
+
+        // 가상 다운로드 알림
+        function simulateDownload(filename) {
+            showToast(
+                "파일 다운로드 개시", 
+                `[${filename}] 파일의 스마트 가상 다운로드가 진행됩니다. 안전보건 교육 및 실무 현장에서 상시 참조할 수 있습니다.`,
+                '<i class="fa-solid fa-file-arrow-down"></i>'
+            );
+        }
+
+        // 공유게시판 신규 등록 비즈니스 로직
+        function handleShareSubmit(event) {
+            event.preventDefault();
+            
+            const category = document.getElementById('share-category').value;
+            const title = document.getElementById('share-title').value;
+            const desc = document.getElementById('share-desc').value;
+            const fileInput = document.getElementById('share-file');
+            
+            let filename = "첨부파일_없음.pdf";
+            let filesize = "0 KB";
+            
+            if (fileInput.files && fileInput.files[0]) {
+                filename = fileInput.files[0].name;
+                filesize = (fileInput.files[0].size / 1024).toFixed(0) + " KB";
+            } else {
+                filename = `${title}_가이드라인.pdf`;
+                filesize = "1.2 MB";
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            
+            // 신규 노드 추가
+            const container = document.getElementById('share-list-container');
+            const iconClass = category === '위험성평가' ? 'fa-file-excel' : (category === '안전교육' ? 'fa-file-pdf' : 'fa-file-invoice');
+            const bgClass = category === '위험성평가' ? 'bg-amber-100 text-amber-700 border-amber-200' : (category === '안전교육' ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200');
+            const badgeClass = category === '위험성평가' ? 'bg-amber-50 text-amber-700 border-amber-200' : (category === '안전교육' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200');
+
+            const newItem = document.createElement('div');
+            newItem.className = "bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:border-blue-200 transition-colors flex items-start gap-4 animate-fade-in";
+            newItem.innerHTML = `
+                <div class="${bgClass.split(' ')[0]} ${bgClass.split(' ')[1]} p-3 rounded-xl text-xl flex items-center justify-center h-12 w-12 flex-shrink-0">
+                    <i class="fa-solid ${iconClass}"></i>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="${badgeClass} text-[10px] px-2 py-0.5 rounded border font-bold">${category}</span>
+                        <span class="text-xs text-slate-400">작성일: ${today}</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-base mt-1 truncate">${title}</h4>
+                    <p class="text-slate-600 text-xs mt-1">${desc}</p>
+                    <div class="mt-3 flex justify-between items-center text-xs">
+                        <span class="text-slate-400">등록자: 익명안전인 (현장관리)</span>
+                        <button onclick="simulateDownload('${filename}')" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors">
+                            <i class="fa-solid fa-download"></i> 다운로드 (${filesize})
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // 맨 위에 삽입
+            container.insertBefore(newItem, container.firstChild);
+            
+            // 개수 갱신
+            const countEl = document.getElementById('share-count');
+            countEl.textContent = parseInt(countEl.textContent) + 1;
+
+            // 폼 리셋
+            document.getElementById('share-title').value = '';
+            document.getElementById('share-desc').value = '';
+            document.getElementById('share-file').value = '';
+            document.getElementById('file-name-display').classList.add('hidden');
+
+            showToast("자료 공유 완료", "현장 실무 서식 자료실에 소중한 안전 리소스가 등록되었습니다. 동료 관리자들에게 즉시 공유됩니다!");
+        }
+
+        // 자유게시판 글 등록 비즈니스 로직
+        function handlePostSubmit(event) {
+            event.preventDefault();
+
+            const author = document.getElementById('post-author').value;
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+
+            const container = document.getElementById('post-list-container');
+            const today = "방금 전";
+
+            const newPost = document.createElement('div');
+            newPost.className = "bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:border-slate-300 transition-colors animate-fade-in";
+            newPost.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs">${author.substring(0, 1)}</div>
+                        <div>
+                            <span class="text-sm font-bold text-slate-800 block">${author}</span>
+                            <span class="text-[10px] text-slate-400">${today} | 전국안전실시간</span>
+                        </div>
+                    </div>
+                    <span class="text-xs text-slate-400">IP: 125.14.*.*</span>
+                </div>
+                <h4 class="font-bold text-slate-800 text-base mt-1">${title}</h4>
+                <p class="text-slate-600 text-sm mt-1.5 leading-relaxed">${content.replace(/\n/g, '<br>')}</p>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
+                    <button onclick="incrementLike(this)" class="flex items-center gap-1 hover:text-red-500 transition-colors">
+                        <i class="fa-regular fa-thumbs-up text-sm"></i> 추천 <span class="like-count font-bold">0</span>
+                    </button>
+                    <span class="flex items-center gap-1"><i class="fa-regular fa-comment text-sm"></i> 댓글 0</span>
+                </div>
+            `;
+
+            // 공지사항 아래에 첫 번째 일반글로 삽입하기 위해 공지사항 바로 뒤에 추가
+            const pinnedPost = container.querySelector('.bg-yellow-50');
+            if (pinnedPost && pinnedPost.nextSibling) {
+                container.insertBefore(newPost, pinnedPost.nextSibling);
+            } else {
+                container.appendChild(newPost);
+            }
+
+            // 폼 리셋
+            document.getElementById('post-author').value = '';
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-content').value = '';
+
+            showToast("이야기 업로드 완료", "건설안전 소통 게시판에 이야기가 등록되었습니다. 전국 현장의 따뜻한 피드백을 기대해 주세요!");
+        }
+
+        // 추천 수 변경
+        function incrementLike(button) {
+            const countSpan = button.querySelector('.like-count');
+            let current = parseInt(countSpan.textContent);
+            countSpan.textContent = current + 1;
+
+            button.classList.add('text-red-500');
+            button.querySelector('i').className = "fa-solid fa-thumbs-up text-sm animate-ping";
+            setTimeout(() => {
+                button.querySelector('i').className = "fa-solid fa-thumbs-up text-sm";
+            }, 500);
+        }
+    </script>
+</body>
+</html>
+
+```
